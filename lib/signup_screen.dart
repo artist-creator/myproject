@@ -33,20 +33,24 @@ class _SignupScreenState extends State<SignupScreen> {
 
       Navigator.pushReplacementNamed(context, '/login');
     } else {
-      showDialog(
-        context: context,
-        builder: (_) => AlertDialog(
-          title: const Text("Validation Error"),
-          content: const Text("Please fill all fields."),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text("OK"),
-            )
-          ],
-        ),
-      );
+      showMessage("Please fill all fields.");
     }
+  }
+
+  void showMessage(String message) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text("Validation Error"),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("OK"),
+          )
+        ],
+      ),
+    );
   }
 
   @override

@@ -35,7 +35,7 @@ class _LoginScreenState extends State<LoginScreen> {
         );
 
     if (isAuthenticated) {
-      showMessage("Login Successful!");
+      Navigator.pushReplacementNamed(context, '/home');
     } else {
       showMessage("Incorrect email or password.");
     }
