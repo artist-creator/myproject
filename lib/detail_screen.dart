@@ -1,23 +1,23 @@
 import 'package:flutter/material.dart';
+import 'search_screen.dart';
 
 class DetailScreen extends StatelessWidget {
+
   final Map<String, dynamic> movie;
 
   const DetailScreen({super.key, required this.movie});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.grey[100],
 
+    final posterPath = movie["poster_path"];
+    final posterUrl = posterPath != null
+        ? "https://image.tmdb.org/t/p/w300$posterPath"
+        : null;
+
+    return Scaffold(
       appBar: AppBar(
-        title: const Text("Details"),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
+        title: Text(movie["title"] ?? movie["Title"] ?? "Details"),
       ),
 
       body: SingleChildScrollView(
@@ -26,47 +26,15 @@ class DetailScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
 
-            // Placeholder image
-            Container(
-              height: 200,
-              width: double.infinity,
-              color: Colors.grey[300],
-            ),
+            if (posterUrl != null)
+              Center(
+                child: Image.network(posterUrl, height: 250),
+              ),
 
             const SizedBox(height: 20),
 
             Text(
-              "Title: ${movie['title']}",
-              style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold),
-            ),
-
-            const SizedBox(height: 8),
-
-            Text(
-              "Release Year: ${movie['year']}",
-              style: const TextStyle(fontSize: 16),
-            ),
-
-            const SizedBox(height: 8),
-
-            Text(
-              "IMDB Rating: ${movie['imdb']}",
-              style: const TextStyle(fontSize: 16),
-            ),
-
-            const SizedBox(height: 8),
-
-            Text(
-              "Cast: ${movie['cast']}",
-              style: const TextStyle(fontSize: 16),
-            ),
-
-            const SizedBox(height: 8),
-
-            Text(
-              "Description: ${movie['description']}",
+              movie["overview"] ?? "No description available.",
               style: const TextStyle(fontSize: 16),
             ),
           ],
@@ -74,9 +42,19 @@ class DetailScreen extends StatelessWidget {
       ),
 
       floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.green,
-        onPressed: () {},
         child: const Icon(Icons.add),
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => SearchScreen(
+                onAddMovie: (movie) {
+                  Navigator.pop(context);
+                },
+              ),
+            ),
+          );
+        },
       ),
     );
   }

@@ -1,52 +1,26 @@
 import 'package:flutter/material.dart';
+import 'search_screen.dart';
 import 'detail_screen.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+
+  List<Map<String, dynamic>> toWatch = [];
+
+  void addMovie(Map<String, dynamic> movie) {
+    setState(() {
+      toWatch.add(movie);
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-
-    final watchNext = [
-      {
-        "title": "Interstellar",
-        "year": "2014",
-        "imdb": "8.4",
-        "cast": "Rayn Renolds, Dawn Johnson, Johny Depp, Al Pachino",
-        "description": "The way he explores time, space, and love as dimensions beyond our understanding is truly mind-blowing."
-      },
-      {
-        "title": "Lost Ladies",
-        "year": "2024",
-        "imdb": "8.1",
-        "cast": "Actor A, Actor B",
-        "description": "A story of courage and resilience."
-      },
-      {
-        "title": "Tragic Moments",
-        "year": "2021",
-        "imdb": "7.9",
-        "cast": "Actor C, Actor D",
-        "description": "An emotional rollercoaster."
-      }
-    ];
-
-    final watched = [
-      {
-        "title": "Namurad",
-        "year": "2025",
-        "imdb": "8.4",
-        "cast": "Actor X, Actor Y",
-        "description": "A gripping drama."
-      },
-      {
-        "title": "Meow Meow",
-        "year": "2022",
-        "imdb": "9.2",
-        "cast": "Actor Cat, Actor Dog",
-        "description": "A fun adventure."
-      }
-    ];
 
     return Scaffold(
       backgroundColor: Colors.grey[100],
@@ -58,12 +32,13 @@ class HomeScreen extends StatelessWidget {
           children: const [
             Icon(Icons.movie, color: Colors.black),
             SizedBox(width: 8),
-            Text("Movilt", style: TextStyle(color: Colors.black)),
+            Text("Movilt",
+                style: TextStyle(color: Colors.black)),
           ],
         ),
       ),
 
-      body: SingleChildScrollView(
+      body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -80,74 +55,59 @@ class HomeScreen extends StatelessWidget {
 
             const SizedBox(height: 20),
 
-            const Text("Watch Next",
-                style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold)),
+            const Text(
+              "To Watch",
+              style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold),
+            ),
 
             const SizedBox(height: 10),
 
-            ...watchNext.map((movie) => movieCard(context, movie)),
+            Expanded(
+              child: ListView.builder(
+                itemCount: toWatch.length,
+                itemBuilder: (context, index) {
 
-            const SizedBox(height: 20),
+                  final movie = toWatch[index];
 
-            const Text("Already Watched",
-                style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold)),
-
-            const SizedBox(height: 10),
-
-            ...watched.map((movie) => movieCard(context, movie)),
+                  return Card(
+                    child: ListTile(
+                      title: Text(movie["title"] ?? movie["Title"]),
+                      subtitle: Text(
+                        movie["release_date"] != null
+                            ? movie["release_date"]
+                            : "No Date",
+                      ),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                DetailScreen(movie: movie),
+                          ),
+                        );
+                      },
+                    ),
+                  );
+                },
+              ),
+            )
           ],
         ),
       ),
 
       floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.green,
-        onPressed: () {},
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) =>
+                  SearchScreen(onAddMovie: addMovie),
+            ),
+          );
+        },
         child: const Icon(Icons.add),
-      ),
-    );
-  }
-
-  Widget movieCard(BuildContext context, Map<String, dynamic> movie) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => DetailScreen(movie: movie),
-          ),
-        );
-      },
-      child: Card(
-        margin: const EdgeInsets.only(bottom: 12),
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Row(
-            children: [
-
-              Container(
-                width: 60,
-                height: 60,
-                color: Colors.grey[300],
-              ),
-
-              const SizedBox(width: 16),
-
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text("Title: ${movie['title']}",
-                      style: const TextStyle(fontWeight: FontWeight.bold)),
-                  Text("Year: ${movie['year']}"),
-                  Text("IMDB: ${movie['imdb']}"),
-                ],
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }
