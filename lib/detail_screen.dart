@@ -1,61 +1,65 @@
 import 'package:flutter/material.dart';
-import 'search_screen.dart';
+import 'movie_api_service.dart';
 
-class DetailScreen extends StatelessWidget {
+class DetailScreen extends StatefulWidget {
 
   final Map<String, dynamic> movie;
 
   const DetailScreen({super.key, required this.movie});
 
   @override
+  State<DetailScreen> createState() => _DetailScreenState();
+}
+
+class _DetailScreenState extends State<DetailScreen> {
+
+  Map<String, dynamic>? fullDetails;
+  bool loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchDetails();
+  }
+
+  Future<void> fetchDetails() async {
+    final details =
+        await MovieApiService.getMovieDetails(widget.movie["imdbID"]);
+
+    setState(() {
+      fullDetails = details;
+      loading = false;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
 
-    final posterPath = movie["poster_path"];
-    final posterUrl = posterPath != null
-        ? "https://image.tmdb.org/t/p/w300$posterPath"
-        : null;
-
     return Scaffold(
-      appBar: AppBar(
-        title: Text(movie["title"] ?? movie["Title"] ?? "Details"),
-      ),
+      appBar: AppBar(title: Text(widget.movie["Title"])),
 
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+      body: loading
+          ? const Center(child: CircularProgressIndicator())
+          : Padding(
+              padding: const EdgeInsets.all(16),
+              child: ListView(
+                children: [
 
-            if (posterUrl != null)
-              Center(
-                child: Image.network(posterUrl, height: 250),
-              ),
+                  if (fullDetails?["Poster"] != "N/A")
+                    Image.network(fullDetails?["Poster"]),
 
-            const SizedBox(height: 20),
+                  const SizedBox(height: 20),
 
-            Text(
-              movie["overview"] ?? "No description available.",
-              style: const TextStyle(fontSize: 16),
-            ),
-          ],
-        ),
-      ),
+                  Text("Genre: ${fullDetails?["Genre"]}"),
+                  Text("IMDB Rating: ${fullDetails?["imdbRating"]}"),
+                  Text("Actors: ${fullDetails?["Actors"]}"),
 
-      floatingActionButton: FloatingActionButton(
-        child: const Icon(Icons.add),
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => SearchScreen(
-                onAddMovie: (movie) {
-                  Navigator.pop(context);
-                },
+                  const SizedBox(height: 10),
+
+                  Text(fullDetails?["Plot"] ?? ""),
+                ],
               ),
             ),
-          );
-        },
-      ),
     );
   }
 }

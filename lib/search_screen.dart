@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'movie_api_service.dart';
 
 class SearchScreen extends StatefulWidget {
 
@@ -17,70 +16,41 @@ class SearchScreen extends StatefulWidget {
 class _SearchScreenState extends State<SearchScreen> {
 
   List<Map<String, dynamic>> movies = [];
-  bool loading = false;
-  String errorMessage = "";
+  bool loading = true;
 
   @override
   void initState() {
     super.initState();
-    loadTrending();
+    loadDummyData();
   }
 
-  Future<void> loadTrending() async {
-    try {
-      setState(() {
-        loading = true;
-        errorMessage = "";
-      });
+  void loadDummyData() {
+    // Simulated API result
+    movies = [
+      {
+        "Title": "Batman Begins",
+        "Year": "2005",
+        "Poster": "https://m.media-amazon.com/images/I/51k0qa6L9BL._AC_.jpg",
+        "imdbID": "tt0372784"
+      },
+      {
+        "Title": "The Dark Knight",
+        "Year": "2008",
+        "Poster": "https://m.media-amazon.com/images/I/51EbJjlLgFL._AC_.jpg",
+        "imdbID": "tt0468569"
+      }
+    ];
 
-      final results = await MovieApiService.getTrendingMovies();
-
-      setState(() {
-        movies = results;
-        loading = false;
-      });
-
-    } catch (e) {
-      setState(() {
-        loading = false;
-        errorMessage = "Failed to load trending movies";
-      });
-    }
-  }
-
-  Future<void> searchMovies(String query) async {
-
-    if (query.isEmpty) {
-      loadTrending();
-      return;
-    }
-
-    try {
-      setState(() {
-        loading = true;
-        errorMessage = "";
-      });
-
-      final results = await MovieApiService.searchMovies(query);
-
-      setState(() {
-        movies = results;
-        loading = false;
-      });
-
-    } catch (e) {
-      setState(() {
-        loading = false;
-        errorMessage = "Search failed";
-      });
-    }
+    setState(() {
+      loading = false;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Add Movie to Watch")),
+      appBar: AppBar(title: const Text("Add Movie")),
 
       body: Column(
         children: [
@@ -89,10 +59,9 @@ class _SearchScreenState extends State<SearchScreen> {
             padding: const EdgeInsets.all(12),
             child: TextField(
               decoration: const InputDecoration(
-                hintText: "Search movies...",
+                hintText: "Search movie...",
                 border: OutlineInputBorder(),
               ),
-              onChanged: searchMovies,
             ),
           ),
 
@@ -102,56 +71,34 @@ class _SearchScreenState extends State<SearchScreen> {
               child: CircularProgressIndicator(),
             ),
 
-          if (errorMessage.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.all(12),
-              child: Text(
-                errorMessage,
-                style: const TextStyle(color: Colors.red),
-              ),
-            ),
-
           if (!loading)
             Expanded(
-              child: movies.isEmpty
-                  ? const Center(child: Text("No movies found"))
-                  : ListView.builder(
-                      itemCount: movies.length,
-                      itemBuilder: (context, index) {
+              child: ListView.builder(
+                itemCount: movies.length,
+                itemBuilder: (context, index) {
 
-                        final movie = movies[index];
+                  final movie = movies[index];
 
-                        final posterPath = movie["poster_path"];
-                        final posterUrl = posterPath != null
-                            ? "https://image.tmdb.org/t/p/w200$posterPath"
-                            : null;
-
-                        return Card(
-                          margin: const EdgeInsets.all(8),
-                          child: ListTile(
-                            leading: posterUrl != null
-                                ? Image.network(posterUrl, width: 50)
-                                : const Icon(Icons.movie),
-
-                            title: Text(movie["title"] ?? "No Title"),
-
-                            subtitle: Text(
-                              movie["release_date"] != null
-                                  ? movie["release_date"]
-                                  : "No Date",
-                            ),
-
-                            trailing: ElevatedButton(
-                              child: const Text("Add"),
-                              onPressed: () {
-                                widget.onAddMovie(movie);
-                                Navigator.pop(context);
-                              },
-                            ),
-                          ),
-                        );
-                      },
+                  return Card(
+                    margin: const EdgeInsets.all(8),
+                    child: ListTile(
+                      leading: Image.network(
+                        movie["Poster"],
+                        width: 50,
+                      ),
+                      title: Text(movie["Title"]),
+                      subtitle: Text("Year: ${movie["Year"]}"),
+                      trailing: ElevatedButton(
+                        child: const Text("Add"),
+                        onPressed: () {
+                          widget.onAddMovie(movie);
+                          Navigator.pop(context);
+                        },
+                      ),
                     ),
+                  );
+                },
+              ),
             ),
         ],
       ),

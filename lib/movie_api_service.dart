@@ -3,42 +3,53 @@ import 'package:http/http.dart' as http;
 
 class MovieApiService {
 
-  static const String apiKey = "cb07a1e0544ab7f2c2d332f39f4b4116";
-  static const String baseUrl = "https://api.themoviedb.org/3";
+  static const String apiKey = "1769584f";
+
+  static String buildProxyUrl(String url) {
+    return "https://api.allorigins.win/raw?url=${Uri.encodeComponent(url)}";
+  }
 
   static Future<List<Map<String, dynamic>>> searchMovies(String query) async {
-    try {
-      final url = Uri.parse(
-          "$baseUrl/search/movie?api_key=$apiKey&query=$query");
 
-      final response = await http.get(url);
+    final originalUrl =
+        "https://www.omdbapi.com/?apikey=$apiKey&s=$query";
 
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        return List<Map<String, dynamic>>.from(data["results"]);
-      } else {
-        return [];
+    final proxyUrl = buildProxyUrl(originalUrl);
+
+    final response = await http.get(Uri.parse(proxyUrl));
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+
+      if (data["Response"] == "True") {
+        return List<Map<String, dynamic>>.from(data["Search"]);
       }
-    } catch (e) {
-      return [];
     }
+
+    return [];
+  }
+
+  static Future<Map<String, dynamic>?> getMovieDetails(String imdbID) async {
+
+    final originalUrl =
+        "https://www.omdbapi.com/?apikey=$apiKey&i=$imdbID";
+
+    final proxyUrl = buildProxyUrl(originalUrl);
+
+    final response = await http.get(Uri.parse(proxyUrl));
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+
+      if (data["Response"] == "True") {
+        return data;
+      }
+    }
+
+    return null;
   }
 
   static Future<List<Map<String, dynamic>>> getTrendingMovies() async {
-    try {
-      final url = Uri.parse(
-          "$baseUrl/trending/movie/day?api_key=$apiKey");
-
-      final response = await http.get(url);
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        return List<Map<String, dynamic>>.from(data["results"]);
-      } else {
-        return [];
-      }
-    } catch (e) {
-      return [];
-    }
+    return searchMovies("Batman");
   }
 }
