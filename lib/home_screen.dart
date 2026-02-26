@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'search_screen.dart';
 import 'detail_screen.dart';
+import 'persistence_service.dart';
+import 'login_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -12,90 +14,149 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
 
   List<Map<String, dynamic>> toWatch = [];
+  bool loading = true;
 
-  void addMovie(Map<String, dynamic> movie) {
+  @override
+  void initState() {
+    super.initState();
+    loadSavedMovies();
+  }
+
+  Future<void> loadSavedMovies() async {
+    final savedMovies = await PersistenceService.loadMovies();
+    setState(() {
+      toWatch = savedMovies;
+      loading = false;
+    });
+  }
+
+  void addMovie(Map<String, dynamic> movie) async {
     setState(() {
       toWatch.add(movie);
     });
+    await PersistenceService.saveMovies(toWatch);
+  }
+
+  void logout() async {
+    await PersistenceService.saveMovies([]);
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => const LoginScreen()),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
 
     return Scaffold(
-      backgroundColor: Colors.grey[100],
-
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        title: Row(
-          children: const [
-            Icon(Icons.movie, color: Colors.black),
-            SizedBox(width: 8),
-            Text("Movilt",
-                style: TextStyle(color: Colors.black)),
-          ],
-        ),
+        title: const Text("MoviIt"),
       ),
 
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+      // 🔥 DRAWER (Hamburger Menu)
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
           children: [
 
-            const Center(
-              child: Text(
-                "Movies, Maza, Masti",
+            DrawerHeader(
+              decoration: BoxDecoration(
+                color: Colors.blue.shade700,
+              ),
+              child: const Text(
+                "Hello, User!",
                 style: TextStyle(
-                    fontSize: 20,
-                    color: Colors.green),
+                  color: Colors.white,
+                  fontSize: 22,
+                ),
               ),
             ),
 
-            const SizedBox(height: 20),
-
-            const Text(
-              "To Watch",
-              style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold),
+            ListTile(
+              leading: const Icon(Icons.person),
+              title: const Text("Profile"),
             ),
 
-            const SizedBox(height: 10),
+            ListTile(
+              leading: const Icon(Icons.settings),
+              title: const Text("Settings"),
+            ),
 
-            Expanded(
-              child: ListView.builder(
-                itemCount: toWatch.length,
-                itemBuilder: (context, index) {
+            ListTile(
+              leading: const Icon(Icons.notifications),
+              title: const Text("Notification"),
+            ),
 
-                  final movie = toWatch[index];
+            ListTile(
+              leading: const Icon(Icons.lock),
+              title: const Text("Password & Security"),
+            ),
 
-                  return Card(
-                    child: ListTile(
-                      title: Text(movie["title"] ?? movie["Title"]),
-                      subtitle: Text(
-                        movie["release_date"] != null
-                            ? movie["release_date"]
-                            : "No Date",
-                      ),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) =>
-                                DetailScreen(movie: movie),
-                          ),
-                        );
-                      },
-                    ),
-                  );
-                },
+            ListTile(
+              leading: const Icon(Icons.info),
+              title: const Text("About"),
+            ),
+
+            ListTile(
+              leading: const Icon(Icons.help),
+              title: const Text("Help"),
+            ),
+
+            const Divider(),
+
+            ListTile(
+              title: const Text(
+                "Terms & Conditions",
+                style: TextStyle(color: Colors.blue),
               ),
-            )
+            ),
+
+            ListTile(
+              leading: const Icon(Icons.logout, color: Colors.red),
+              title: const Text(
+                "Log Out",
+                style: TextStyle(color: Colors.red),
+              ),
+              onTap: logout,
+            ),
+
+            ListTile(
+              title: const Text(
+                "Delete Account",
+                style: TextStyle(color: Colors.red),
+              ),
+            ),
           ],
         ),
       ),
+
+      body: loading
+          ? const Center(child: CircularProgressIndicator())
+          : toWatch.isEmpty
+              ? const Center(child: Text("No movies added"))
+              : ListView.builder(
+                  itemCount: toWatch.length,
+                  itemBuilder: (context, index) {
+                    final movie = toWatch[index];
+
+                    return Card(
+                      child: ListTile(
+                        title: Text(movie["Title"] ?? ""),
+                        subtitle:
+                            Text("Year: ${movie["Year"] ?? ""}"),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) =>
+                                  DetailScreen(movie: movie),
+                            ),
+                          );
+                        },
+                      ),
+                    );
+                  },
+                ),
 
       floatingActionButton: FloatingActionButton(
         onPressed: () {
