@@ -4,6 +4,7 @@ import 'detail_screen.dart';
 import 'persistence_service.dart';
 import 'login_screen.dart';
 import 'personal_info_screen.dart';
+import 'notifications_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -24,7 +25,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> loadSavedMovies() async {
-    final savedMovies = await PersistenceService.loadMovies();
+    final savedMovies =
+        await PersistenceService.loadMovies();
     setState(() {
       toWatch = savedMovies;
       loading = false;
@@ -42,7 +44,8 @@ class _HomeScreenState extends State<HomeScreen> {
     await PersistenceService.saveMovies([]);
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (_) => const LoginScreen()),
+      MaterialPageRoute(
+          builder: (_) => const LoginScreen()),
     );
   }
 
@@ -54,7 +57,6 @@ class _HomeScreenState extends State<HomeScreen> {
         title: const Text("MoviIt"),
       ),
 
-      // 🔥 HAMBURGER DRAWER
       drawer: Drawer(
         child: ListView(
           padding: EdgeInsets.zero,
@@ -85,84 +87,74 @@ class _HomeScreenState extends State<HomeScreen> {
               leading: const Icon(Icons.settings),
               title: const Text("Settings"),
               onTap: () {
-                Navigator.pop(context); // close drawer
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => const PersonalInfoScreen(),
-                  ),
+                      builder: (_) =>
+                          const PersonalInfoScreen()),
                 );
               },
             ),
 
             ListTile(
-              leading: const Icon(Icons.notifications),
-              title: const Text("Notification"),
-            ),
-
-            ListTile(
-              leading: const Icon(Icons.lock),
-              title: const Text("Password & Security"),
-            ),
-
-            ListTile(
-              leading: const Icon(Icons.info),
-              title: const Text("About"),
-            ),
-
-            ListTile(
-              leading: const Icon(Icons.help),
-              title: const Text("Help"),
+              leading:
+                  const Icon(Icons.notifications),
+              title:
+                  const Text("Notification"),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (_) =>
+                          const NotificationsScreen()),
+                );
+              },
             ),
 
             const Divider(),
 
             ListTile(
-              title: const Text(
-                "Terms & Conditions",
-                style: TextStyle(color: Colors.blue),
-              ),
-            ),
-
-            ListTile(
-              leading: const Icon(Icons.logout, color: Colors.red),
+              leading: const Icon(Icons.logout,
+                  color: Colors.red),
               title: const Text(
                 "Log Out",
-                style: TextStyle(color: Colors.red),
+                style:
+                    TextStyle(color: Colors.red),
               ),
               onTap: logout,
-            ),
-
-            ListTile(
-              title: const Text(
-                "Delete Account",
-                style: TextStyle(color: Colors.red),
-              ),
             ),
           ],
         ),
       ),
 
       body: loading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(
+              child: CircularProgressIndicator())
           : toWatch.isEmpty
-              ? const Center(child: Text("No movies added"))
+              ? const Center(
+                  child: Text("No movies added"))
               : ListView.builder(
                   itemCount: toWatch.length,
-                  itemBuilder: (context, index) {
-                    final movie = toWatch[index];
+                  itemBuilder:
+                      (context, index) {
+
+                    final movie =
+                        toWatch[index];
 
                     return Card(
                       child: ListTile(
-                        title: Text(movie["Title"] ?? ""),
-                        subtitle:
-                            Text("Year: ${movie["Year"] ?? ""}"),
+                        title: Text(
+                            movie["Title"] ?? ""),
+                        subtitle: Text(
+                            "Year: ${movie["Year"] ?? ""}"),
                         onTap: () {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
                               builder: (_) =>
-                                  DetailScreen(movie: movie),
+                                  DetailScreen(
+                                      movie:
+                                          movie),
                             ),
                           );
                         },
@@ -171,13 +163,15 @@ class _HomeScreenState extends State<HomeScreen> {
                   },
                 ),
 
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton:
+          FloatingActionButton(
         onPressed: () {
           Navigator.push(
             context,
             MaterialPageRoute(
               builder: (_) =>
-                  SearchScreen(onAddMovie: addMovie),
+                  SearchScreen(
+                      onAddMovie: addMovie),
             ),
           );
         },
