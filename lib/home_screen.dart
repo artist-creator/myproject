@@ -3,6 +3,7 @@ import 'search_screen.dart';
 import 'detail_screen.dart';
 import 'persistence_service.dart';
 import 'login_screen.dart';
+import 'personal_info_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -53,7 +54,7 @@ class _HomeScreenState extends State<HomeScreen> {
         title: const Text("MoviIt"),
       ),
 
-      // 🔥 DRAWER (Hamburger Menu)
+      // 🔥 HAMBURGER DRAWER
       drawer: Drawer(
         child: ListView(
           padding: EdgeInsets.zero,
@@ -63,11 +64,14 @@ class _HomeScreenState extends State<HomeScreen> {
               decoration: BoxDecoration(
                 color: Colors.blue.shade700,
               ),
-              child: const Text(
-                "Hello, User!",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 22,
+              child: const Align(
+                alignment: Alignment.bottomLeft,
+                child: Text(
+                  "Hello, User!",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 22,
+                  ),
                 ),
               ),
             ),
@@ -80,6 +84,15 @@ class _HomeScreenState extends State<HomeScreen> {
             ListTile(
               leading: const Icon(Icons.settings),
               title: const Text("Settings"),
+              onTap: () {
+                Navigator.pop(context); // close drawer
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const PersonalInfoScreen(),
+                  ),
+                );
+              },
             ),
 
             ListTile(
