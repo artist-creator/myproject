@@ -1,142 +1,75 @@
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'app_styles.dart';
 
-class PersonalInfoScreen extends StatefulWidget {
+class PersonalInfoScreen extends StatelessWidget {
   const PersonalInfoScreen({super.key});
 
   @override
-  State<PersonalInfoScreen> createState() =>
-      _PersonalInfoScreenState();
-}
-
-class _PersonalInfoScreenState
-    extends State<PersonalInfoScreen> {
-
-  final _nameController = TextEditingController();
-  final _usernameController = TextEditingController();
-
-  double _age = 25;
-  String _country = 'India';
-
-  @override
-  void initState() {
-    super.initState();
-    _loadUserData();
-  }
-
-  Future<void> _loadUserData() async {
-    SharedPreferences prefs =
-        await SharedPreferences.getInstance();
-
-    setState(() {
-      _nameController.text =
-          prefs.getString('name') ?? '';
-      _usernameController.text =
-          prefs.getString('username') ?? '';
-      _age = prefs.getDouble('age') ?? 25;
-      _country =
-          prefs.getString('country') ?? 'India';
-    });
-  }
-
-  Future<void> _saveUserData() async {
-    SharedPreferences prefs =
-        await SharedPreferences.getInstance();
-
-    await prefs.setString(
-        'name', _nameController.text);
-    await prefs.setString(
-        'username', _usernameController.text);
-    await prefs.setDouble('age', _age);
-    await prefs.setString('country', _country);
-
-    Fluttertoast.showToast(
-      msg: "Profile updated successfully",
-      toastLength: Toast.LENGTH_SHORT,
-      gravity: ToastGravity.BOTTOM,
-      backgroundColor: Colors.green,
-      textColor: Colors.white,
-    );
-  }
-
-  @override
   Widget build(BuildContext context) {
-
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('Personal Info'),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Text("Profile Settings", style: AppStyles.bodyBold),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: ListView(
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(25),
+        child: Column(
           children: [
-
-            TextField(
-              controller: _nameController,
-              decoration:
-                  const InputDecoration(
-                      labelText: 'Name'),
+            const CircleAvatar(
+              radius: 50,
+              backgroundColor: AppStyles.cardGrey,
+              child: Icon(Icons.person, size: 50, color: Colors.black54),
             ),
-
-            const SizedBox(height: 12),
-
-            TextField(
-              controller: _usernameController,
-              decoration:
-                  const InputDecoration(
-                      labelText: 'Username'),
-            ),
-
-            const SizedBox(height: 20),
-
-            const Text("Age"),
-            Slider(
-              value: _age,
-              min: 18,
-              max: 100,
-              divisions: 82,
-              label: _age.round().toString(),
-              onChanged: (value) {
-                setState(() {
-                  _age = value;
-                });
-              },
-            ),
-
-            const SizedBox(height: 20),
-
-            const Text("Country"),
-            DropdownButton<String>(
-              value: _country,
-              isExpanded: true,
-              items: [
-                'India',
-                'United States',
-                'Canada'
-              ]
-                  .map((country) =>
-                      DropdownMenuItem(
-                        value: country,
-                        child: Text(country),
-                      ))
-                  .toList(),
-              onChanged: (value) {
-                setState(() {
-                  _country = value!;
-                });
-              },
-            ),
-
-            const SizedBox(height: 20),
-
-            ElevatedButton(
-              onPressed: _saveUserData,
-              child:
-                  const Text("Save Changes"),
+            const SizedBox(height: 30),
+            _buildProfileItem("Username", "User"),
+            _buildProfileItem("Email", "user@example.com"),
+            const SizedBox(height: 40),
+            SizedBox(
+              width: double.infinity,
+              height: 50,
+              child: ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppStyles.primaryBlue,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                ),
+                child: const Text("Save Changes", style: TextStyle(color: Colors.white)),
+              ),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildProfileItem(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label, style: GoogleFonts.inter(fontWeight: FontWeight.w700, fontSize: 14)),
+          const SizedBox(height: 8),
+          TextField(
+            readOnly: true,
+            decoration: InputDecoration(
+              hintText: value,
+              filled: true,
+              fillColor: AppStyles.cardGrey.withOpacity(0.3),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide.none,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
