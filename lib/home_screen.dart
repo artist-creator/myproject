@@ -4,6 +4,8 @@ import 'app_styles.dart';
 import 'search_screen.dart';
 import 'detail_screen.dart';
 import 'local_storage_service.dart';
+import 'personal_info_screen.dart';
+import 'notifications_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -24,7 +26,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _loadData() async {
-    // We will update local_storage_service to handle these two lists
     final data = await LocalStorageService.loadMovieLists();
     setState(() {
       toWatch = List<Map<String, dynamic>>.from(data['toWatch'] ?? []);
@@ -60,6 +61,11 @@ class _HomeScreenState extends State<HomeScreen> {
     _saveData();
   }
 
+  void _handleLogout() async {
+    await LocalStorageService.logout();
+    Navigator.pushReplacementNamed(context, '/login');
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -67,22 +73,54 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        leading: const Padding(
-          padding: EdgeInsets.only(left: 10.0),
-          child: MoviItLogo(size: 30),
-        ),
+        // The menu icon will automatically appear when a Drawer is added
         titleSpacing: 0,
         title: Row(
           children: [
+            const MoviItLogo(size: 25),
             const SizedBox(width: 8),
             Text(
               "Movies, Maza, Masti",
               style: GoogleFonts.inter(
-                fontSize: 16,
+                fontSize: 14,
                 color: AppStyles.textGreen,
                 fontWeight: FontWeight.w600,
               ),
             ),
+          ],
+        ),
+      ),
+      drawer: Drawer(
+        child: Column(
+          children: [
+            DrawerHeader(
+              decoration: const BoxDecoration(color: AppStyles.primaryBlue),
+              child: const Center(child: MoviItLogo(size: 60)),
+            ),
+            ListTile(
+              leading: const Icon(Icons.person),
+              title: const Text("Profile Settings"),
+              onTap: () {
+                Navigator.pop(context); // Close drawer
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const PersonalInfoScreen()));
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.notifications),
+              title: const Text("Notifications"),
+              onTap: () {
+                Navigator.pop(context); // Close drawer
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const NotificationsScreen()));
+              },
+            ),
+            const Spacer(),
+            const Divider(),
+            ListTile(
+              leading: const Icon(Icons.logout, color: Colors.red),
+              title: const Text("Logout", style: TextStyle(color: Colors.red)),
+              onTap: _handleLogout,
+            ),
+            const SizedBox(height: 20),
           ],
         ),
       ),
@@ -101,7 +139,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     Text("Already Watched", style: AppStyles.bodyBold),
                     const SizedBox(height: 10),
                     _buildMovieList(alreadyWatched, false),
-                    const SizedBox(height: 80), // Space for FAB
+                    const SizedBox(height: 80),
                   ],
                 ),
               ),

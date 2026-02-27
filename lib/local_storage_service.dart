@@ -14,7 +14,21 @@ class LocalStorageService {
     final prefs = await SharedPreferences.getInstance();
     String? storedEmail = prefs.getString('email');
     String? storedPassword = prefs.getString('password');
-    return (storedEmail == email && storedPassword == password);
+    if (storedEmail == email && storedPassword == password) {
+      await prefs.setBool('isLoggedIn', true);
+      return true;
+    }
+    return false;
+  }
+
+  static Future<bool> isLoggedIn() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool('isLoggedIn') ?? false;
+  }
+
+  static Future<void> logout() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isLoggedIn', false);
   }
 
   // Movie Lists Persistence
